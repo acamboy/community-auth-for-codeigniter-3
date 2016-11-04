@@ -98,8 +98,16 @@ class MY_Session extends CI_Session {
 		ini_set('session.use_strict_mode', 1);
 		ini_set('session.use_cookies', 1);
 		ini_set('session.use_only_cookies', 1);
-		ini_set('session.hash_function', 1);
-		ini_set('session.hash_bits_per_character', 4);
+
+		if( version_compare( CI_VERSION, '3.1.2', '<' ) )
+		{
+			ini_set('session.hash_function', 1);
+			ini_set('session.hash_bits_per_character', 4);
+		}
+		else
+		{
+			$this->_configure_sid_length();
+		}
 	}
 
 	// ------------------------------------------------------------------------
