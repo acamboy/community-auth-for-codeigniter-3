@@ -45,7 +45,7 @@ class MY_Input extends CI_Input {
 	 * @param	bool	true makes the cookie secure
 	 * @return	void
 	 */
-	public function set_cookie($name, $value = '', $expire = '', $domain = '', $path = '/', $prefix = '', $secure = FALSE, $httponly = FALSE)
+	public function set_cookie($name, $value = '', $expire = 0, $domain = '', $path = '/', $prefix = '', $secure = FALSE, $httponly = FALSE)
 	{
 		if (is_array($name))
 		{
@@ -90,9 +90,9 @@ class MY_Input extends CI_Input {
 			$httponly = config_item('cookie_httponly');
 		}
 
-		if ( ! is_numeric($expire))
+		if ( ! is_numeric($expire) OR $expire < 0)
 		{
-			$expire = time() - 86500;
+			$expire = 1;
 		}
 		else
 		{
