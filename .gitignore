@@ -26,3 +26,5 @@ user_guide_src/
 community_auth_ci_3.sublime-project
 community_auth_ci_3.sublime-workspace
 .idea/
+.editorconfig
+build-release.sh
