@@ -22,6 +22,10 @@ DBPASS=""
 # If symlinks (soft links) should be used instead of copying files
 SYMLINKS=false
 
+# The CI download
+# CIDOWNLOAD="https://github.com/bcit-ci/CodeIgniter/archive/3.1.2.tar.gz"
+CIDOWNLOAD="https://github.com/bcit-ci/CodeIgniter/archive/master.tar.gz"
+
 # -------------------------------------------------------------------------
 
 # Make sure not already installed
@@ -44,7 +48,7 @@ then
 		TMPFILE=`mktemp`
 
 		# Download and extract CodeIgniter (skip old files so .gitignore is not replaced)
-		wget https://github.com/bcit-ci/CodeIgniter/archive/master.tar.gz -O $TMPFILE
+		wget $CIDOWNLOAD -O $TMPFILE
 		tar -xf $TMPFILE --skip-old-files --strip 1
 		rm $TMPFILE
 
@@ -141,6 +145,18 @@ s/'database' => ''/'database' => '$DBNAME'/g;" ./config/database.php
 
 		# Checkout develop from origin
 		git checkout -b develop origin/develop
+
+		# Add a user
+		cd ../../
+		if [ -f ./community_auth_user.sql ];
+		then
+			if [ -n "$DBPASS" ];
+			then
+				cat ./.community_auth_user.sql | mysql -u $DBUSER -p$DBPASS $DBNAME
+			else
+				cat ./.community_auth_user.sql | mysql -u $DBUSER $DBNAME
+			fi
+		fi
 
 		# Success
 		echo "REMOVE INSTALLER SCRIPT (THIS FILE)."
