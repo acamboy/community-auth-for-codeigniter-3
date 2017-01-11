@@ -690,7 +690,7 @@ class Authentication
 		$this->CI->session->set_userdata( 'auth_identifiers', $auth_identifiers );
 
 		// For security, force regenerate the session ID
-		$session_id = $this->CI->session->sess_regenerate( TRUE );
+		$session_id = $this->CI->session->sess_regenerate( config_item('sess_regenerate_destroy') );
 
 		// Update user record in database
 		$this->CI->{$this->auth_model}->login_update( 
