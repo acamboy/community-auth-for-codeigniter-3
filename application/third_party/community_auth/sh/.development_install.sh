@@ -14,7 +14,7 @@ BASEURL="http:\/\/localhost.community_auth_ci_3\/"
 DBNAME="community_auth_ci_3"
 
 # The DB user
-DBUSER="root"
+DBUSER="skunkbad"
 
 # The DB password
 DBPASS=""
@@ -119,6 +119,14 @@ s/\['sess_regenerate_destroy'\] = FALSE/\['sess_regenerate_destroy'\] = TRUE/g;"
 		# Add hooks
 		printf "\$hook['pre_system'] = array(\n\t'function' => 'auth_constants',\n\t'filename' => 'auth_constants.php',\n\t'filepath' => 'hooks'\n);\n\$hook['post_system'] = array(\n\t'function' => 'auth_sess_check',\n\t'filename' => 'auth_sess_check.php',\n\t'filepath' => 'hooks'\n);" >> ./config/hooks.php
 
+		# DROP DB
+		if [ -n "$DBPASS" ];
+		then
+			mysqladmin -u $DBUSER -p$DBPASS drop $DBNAME -f
+		else
+			mysqladmin -u $DBUSER drop $DBNAME -f
+		fi
+
 		# Create DB
 		if [ -n "$DBPASS" ];
 		then
@@ -148,7 +156,7 @@ s/'database' => ''/'database' => '$DBNAME'/g;" ./config/database.php
 
 		# Add a user
 		cd ../../
-		if [ -f ./community_auth_user.sql ];
+		if [ -f ./.community_auth_user.sql ];
 		then
 			if [ -n "$DBPASS" ];
 			then
