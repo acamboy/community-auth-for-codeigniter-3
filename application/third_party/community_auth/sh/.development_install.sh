@@ -22,6 +22,10 @@ DBPASS=""
 # If symlinks (soft links) should be used instead of copying files
 SYMLINKS=false
 
+# Session regenerate destroy (CI session config setting) causes problems
+# on some versions of PHP when the session driver is set to database.
+CI_SESS_REGENERATE_DESTROY=false
+
 # The CI download
 # CIDOWNLOAD="https://github.com/bcit-ci/CodeIgniter/archive/3.1.2.tar.gz"
 CIDOWNLOAD="https://github.com/bcit-ci/CodeIgniter/archive/master.tar.gz"
@@ -113,8 +117,13 @@ s/\['enable_hooks'\] = FALSE/\['enable_hooks'\] = TRUE/g; \
 s/\['encryption_key'\] = ''/\['encryption_key'\] = hex2bin('5d3a06b1a1efeb861ad761fb8839794f')/g; \
 s/\['sess_driver'\] = 'files'/\['sess_driver'\] = 'database'/g; \
 s/\['sess_cookie_name'\] = 'ci_session'/\['sess_cookie_name'\] = 'ciSess'/g; \
-s/\['sess_save_path'\] = NULL/\['sess_save_path'\] = 'ci_sessions'/g; \
-s/\['sess_regenerate_destroy'\] = FALSE/\['sess_regenerate_destroy'\] = TRUE/g;" ./config/config.php
+s/\['sess_save_path'\] = NULL/\['sess_save_path'\] = 'ci_sessions'/g;" ./config/config.php
+
+		# Session config may also destroy old session on regeneration
+		if [ "$CI_SESS_REGENERATE_DESTROY" = true ];
+		then
+			sed -i "s/\['sess_regenerate_destroy'\] = FALSE/\['sess_regenerate_destroy'\] = TRUE/g;" ./config/config.php
+		fi
 
 		# Add hooks
 		printf "\$hook['pre_system'] = array(\n\t'function' => 'auth_constants',\n\t'filename' => 'auth_constants.php',\n\t'filepath' => 'hooks'\n);\n\$hook['post_system'] = array(\n\t'function' => 'auth_sess_check',\n\t'filename' => 'auth_sess_check.php',\n\t'filepath' => 'hooks'\n);" >> ./config/hooks.php
