@@ -25,7 +25,7 @@ class Examples_model extends MY_Model {
 	public function update_user_raw_data( $the_user, $user_data = [] )
 	{
 		$this->db->where('user_id', $the_user)
-			->update( config_item('user_table'), $user_data );
+			->update( $this->db_table('user_table'), $user_data );
 	}
 
 	// --------------------------------------------------------------
@@ -39,7 +39,7 @@ class Examples_model extends MY_Model {
 	public function get_recovery_data( $email )
 	{
 		$query = $this->db->select( 'u.user_id, u.email, u.banned' )
-			->from( config_item('user_table') . ' u' )
+			->from( $this->db_table('user_table') . ' u' )
 			->where( 'LOWER( u.email ) =', strtolower( $email ) )
 			->limit(1)
 			->get();
@@ -63,7 +63,7 @@ class Examples_model extends MY_Model {
 		$recovery_code_expiration = date('Y-m-d H:i:s', time() - config_item('recovery_code_expiration') );
 
 		$query = $this->db->select( 'username, passwd_recovery_code' )
-			->from( config_item('user_table') )
+			->from( $this->db_table('user_table') )
 			->where( 'user_id', $user_id )
 			->where( 'passwd_recovery_date >', $recovery_code_expiration )
 			->limit(1)
@@ -146,7 +146,7 @@ class Examples_model extends MY_Model {
 		if( isset( $user_id ) && $user_id !== FALSE )
 		{
 			$query = $this->db->select( 'user_id' )
-				->from( config_item('user_table') )
+				->from( $this->db_table('user_table') )
 				->where( 'user_id', $user_id )
 				->where( 'passwd_recovery_code', $recovery_code )
 				->get();
@@ -158,7 +158,7 @@ class Examples_model extends MY_Model {
 
 				$this->db->where( 'user_id', $user_data->user_id )
 					->update( 
-						config_item('user_table'), 
+						$this->db_table('user_table'), 
 						['passwd' => $this->authentication->hash_passwd( $password )] 
 					);
 			}
@@ -179,7 +179,7 @@ class Examples_model extends MY_Model {
 
         // Make sure the random user_id isn't already in use
         $query = $this->db->where( 'user_id', $random_unique_int )
-            ->get_where( config_item('user_table') );
+            ->get_where( $this->db_table('user_table') );
 
         if( $query->num_rows() > 0 )
         {

@@ -203,6 +203,7 @@ class Examples extends MY_Controller
         echo $this->load->view('examples/page_header', '', TRUE);
 
         // Load resources
+        $this->load->helper('auth');
         $this->load->model('examples/examples_model');
         $this->load->model('examples/validation_callables');
         $this->load->library('form_validation');
@@ -213,7 +214,7 @@ class Examples extends MY_Controller
 			[
 				'field' => 'username',
 				'label' => 'username',
-				'rules' => 'max_length[12]|is_unique[' . config_item('user_table') . '.username]',
+				'rules' => 'max_length[12]|is_unique[' . db_table('user_table') . '.username]',
                 'errors' => [
                     'is_unique' => 'Username already in use.'
                 ]
@@ -236,7 +237,7 @@ class Examples extends MY_Controller
 			[
                 'field'  => 'email',
                 'label'  => 'email',
-                'rules'  => 'trim|required|valid_email|is_unique[' . config_item('user_table') . '.email]',
+                'rules'  => 'trim|required|valid_email|is_unique[' . db_table('user_table') . '.email]',
                 'errors' => [
                     'is_unique' => 'Email address already in use.'
                 ]
@@ -263,7 +264,7 @@ class Examples extends MY_Controller
             }
 
 			$this->db->set($user_data)
-				->insert(config_item('user_table'));
+				->insert(db_table('user_table'));
 
 			if( $this->db->affected_rows() == 1 )
 				echo '<h1>Congratulations</h1>' . '<p>User ' . $user_data['username'] . ' was created.</p>';

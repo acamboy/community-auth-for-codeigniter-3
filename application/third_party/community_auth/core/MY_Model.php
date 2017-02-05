@@ -42,9 +42,9 @@ class MY_Model extends CI_Model
 	{
 		// ACL table query
 		$query = $this->db->select('b.action_id, b.action_code, c.category_code')
-			->from( config_item('acl_table') . ' a' )
-			->join( config_item('acl_actions_table') . ' b', 'a.action_id = b.action_id' )
-			->join( config_item('acl_categories_table') . ' c', 'b.category_id = c.category_id' )
+			->from( $this->db_table('acl_table') . ' a' )
+			->join( $this->db_table('acl_actions_table') . ' b', 'a.action_id = b.action_id' )
+			->join( $this->db_table('acl_categories_table') . ' c', 'b.category_id = c.category_id' )
 			->where( 'a.user_id', $user_id )
 			->get();
 
@@ -140,6 +140,24 @@ class MY_Model extends CI_Model
 		return FALSE;
 	}
 
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Retrieve the true name of a database table.
+	 *
+	 * @param  string  the alias (common name) of the table
+	 *
+	 * @return  string  the true name (with CI prefix) of the table
+	 */
+	public function db_table( $name )
+	{
+		$name = config_item( $name );
+
+		return ! empty( $name )
+			? $this->db->dbprefix . $name
+			: '';
+	}
+	
 	// -----------------------------------------------------------------------
 }
 

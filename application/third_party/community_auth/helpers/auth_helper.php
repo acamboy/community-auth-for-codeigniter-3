@@ -56,5 +56,26 @@ if( ! function_exists('acl_permits') )
 
 // ------------------------------------------------------------------------
 
+/**
+ * Retrieve the true name of a database table.
+ *
+ * @param  string  the alias (common name) of the table
+ *
+ * @return  string  the true name (with CI prefix) of the table
+ */
+if( ! function_exists('db_table') )
+{
+	function db_table( $name )
+	{
+		$CI =& get_instance();
+
+		$auth_model = $CI->authentication->auth_model;
+
+		return $CI->$auth_model->db_table( $name );
+	}
+}
+
+// ------------------------------------------------------------------------
+
 /* End of file auth_helper.php */
 /* Location: /community_auth/helpers/auth_helper.php */

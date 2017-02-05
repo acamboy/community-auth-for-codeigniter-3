@@ -38,7 +38,7 @@ class Auth_model extends MY_Model {
 
 		// User table query
 		$query = $this->db->select( $selected_columns )
-			->from( config_item('user_table') )
+			->from( $this->db_table('user_table') )
 			->where( 'LOWER( username ) =', strtolower( $user_string ) )
 			->or_where( 'LOWER( email ) =', strtolower( $user_string ) )
 			->limit(1)
@@ -71,13 +71,13 @@ class Auth_model extends MY_Model {
 		if( config_item('disallow_multiple_logins') === TRUE )
 		{
 			$this->db->where( 'user_id', $user_id )
-				->delete( config_item('auth_sessions_table') );
+				->delete( $this->db_table('auth_sessions_table') );
 		}
 
 		$data = ['last_login' => $login_time];
 
 		$this->db->where( 'user_id' , $user_id )
-			->update( config_item('user_table') , $data );
+			->update( $this->db_table('user_table') , $data );
 
 		$data = [
 			'id'         => $session_id,
@@ -87,7 +87,7 @@ class Auth_model extends MY_Model {
 			'user_agent' => $this->_user_agent()
 		];
 
-		$this->db->insert( config_item('auth_sessions_table') , $data );
+		$this->db->insert( $this->db_table('auth_sessions_table') , $data );
 	}
 
 	// --------------------------------------------------------------
@@ -141,8 +141,8 @@ class Auth_model extends MY_Model {
 		];
 
 		$this->db->select( $selected_columns )
-			->from( config_item('user_table') . ' u' )
-			->join( config_item('auth_sessions_table') . ' s', 'u.user_id = s.user_id' )
+			->from( $this->db_table('user_table') . ' u' )
+			->join( $this->db_table('auth_sessions_table') . ' s', 'u.user_id = s.user_id' )
 			->where( 's.user_id', $user_id )
 			->where( 's.login_time', $login_time );
 
@@ -209,7 +209,7 @@ class Auth_model extends MY_Model {
 			$this->db->where( 'user_id', $user_id )
 				->where( 'id', $this->session->pre_regenerated_session_id )
 				->update( 
-					config_item('auth_sessions_table'),
+					$this->db_table('auth_sessions_table'),
 					['id' => $this->session->regenerated_session_id]
 			);
 		}
@@ -224,9 +224,9 @@ class Auth_model extends MY_Model {
 	{
 		$expiration = date('Y-m-d H:i:s', time() - config_item('seconds_on_hold') );
 
-		$this->db->delete( config_item('IP_hold_table'), ['time <' => $expiration] );
+		$this->db->delete( $this->db_table('IP_hold_table'), ['time <' => $expiration] );
 
-		$this->db->delete( config_item('username_or_email_hold_table'), ['time <' => $expiration] );
+		$this->db->delete( $this->db_table('username_or_email_hold_table'), ['time <' => $expiration] );
 	}
 
 	// --------------------------------------------------------------
@@ -238,7 +238,7 @@ class Auth_model extends MY_Model {
 	{
 		$expiration = date('Y-m-d H:i:s', time() - config_item('seconds_on_hold') );
 
-		$this->db->delete( config_item('errors_table'), ['time <' => $expiration] );
+		$this->db->delete( $this->db_table('errors_table'), ['time <' => $expiration] );
 	}
 
 	// --------------------------------------------------------------
@@ -271,7 +271,7 @@ class Auth_model extends MY_Model {
 	public function check_ip_hold()
 	{
 		$ip_hold = $this->db->get_where( 
-			config_item('IP_hold_table'), 
+			$this->db_table('IP_hold_table'), 
 			['ip_address' => $this->input->ip_address()] 
 		);
 
@@ -299,7 +299,7 @@ class Auth_model extends MY_Model {
 		if( ! empty( $posted_string ) && strlen( $posted_string ) < 256 )
 		{
 			$string_hold = $this->db->get_where( 
-				config_item('username_or_email_hold_table'), 
+				$this->db_table('username_or_email_hold_table'), 
 				['username_or_email' => $posted_string] 
 			);
 
@@ -320,7 +320,7 @@ class Auth_model extends MY_Model {
 	public function create_login_error( $data )
 	{
 		$this->db->set( $data )
-			->insert( config_item('errors_table') );
+			->insert( $this->db_table('errors_table') );
 	}
 
 	// --------------------------------------------------------------
@@ -337,7 +337,7 @@ class Auth_model extends MY_Model {
 
 		// Check if this IP now has too many login attempts
 		$count1 = $this->db->where( 'ip_address', $ip_address )
-			->count_all_results( config_item('errors_table') );
+			->count_all_results( $this->db_table('errors_table') );
 
 		if( $count1 == config_item('max_allowed_attempts') )
 		{
@@ -348,7 +348,7 @@ class Auth_model extends MY_Model {
 			];
 
 			$this->db->set( $data )
-				->insert( config_item('IP_hold_table') );
+				->insert( $this->db_table('IP_hold_table') );
 		}
 
 		/**
@@ -392,7 +392,7 @@ class Auth_model extends MY_Model {
 		if( $string != '' )
 		{
 			$count2 = $this->db->where( 'username_or_email', $string )
-				->count_all_results( config_item('errors_table') );
+				->count_all_results( $this->db_table('errors_table') );
 
 			if( $count2 == config_item('max_allowed_attempts') )
 			{
@@ -403,7 +403,7 @@ class Auth_model extends MY_Model {
 				];
 
 				$this->db->set( $data )
-					->insert( config_item('username_or_email_hold_table') );
+					->insert( $this->db_table('username_or_email_hold_table') );
 			}
 		}
 
@@ -421,7 +421,7 @@ class Auth_model extends MY_Model {
 		if( $field !== FALSE )
 			$this->db->select( $field );
 
-		$query = $this->db->from( config_item('denied_access_table') )->get();
+		$query = $this->db->from( $this->db_table('denied_access_table') )->get();
 
 		if( $query->num_rows() > 0 )
 			return $query->result();
@@ -440,7 +440,7 @@ class Auth_model extends MY_Model {
 			return FALSE;
 
 		$this->db->set( $data )
-			->insert( config_item('denied_access_table') );
+			->insert( $this->db_table('denied_access_table') );
 
 		$this->_rebuild_deny_list();
 	}
@@ -467,7 +467,7 @@ class Auth_model extends MY_Model {
 			$i++;
 		}
 
-		$this->db->delete( config_item('denied_access_table') );
+		$this->db->delete( $this->db_table('denied_access_table') );
 
 		$this->_rebuild_deny_list();
 	}
@@ -556,7 +556,7 @@ class Auth_model extends MY_Model {
 	{
 		$this->db->where( 'user_id' , $user_id )
 			->where( 'id', $session_id )
-			->delete( config_item('auth_sessions_table') );
+			->delete( $this->db_table('auth_sessions_table') );
 	}
 
 	// --------------------------------------------------------------
@@ -576,8 +576,8 @@ class Auth_model extends MY_Model {
 			// Immediately delete orphaned auth sessions
 			$this->db->query('
 				DELETE a
-				FROM `' . config_item('auth_sessions_table') . '` a
-				LEFT JOIN `' . config_item('sessions_table') . '` b
+				FROM `' . $this->db_table('auth_sessions_table') . '` a
+				LEFT JOIN `' . $this->db_table('sessions_table') . '` b
 				ON  b.id = a.id
 				WHERE b.id IS NULL
 			');
@@ -587,7 +587,7 @@ class Auth_model extends MY_Model {
 		if( config_item('sess_expiration') != 0 )
 		{
 			$this->db->query('
-				DELETE FROM `' . config_item('auth_sessions_table') . '` 
+				DELETE FROM `' . $this->db_table('auth_sessions_table') . '` 
 				WHERE modified_at < CURDATE() - INTERVAL ' . config_item('sess_expiration') . ' SECOND
 			');
 		}
