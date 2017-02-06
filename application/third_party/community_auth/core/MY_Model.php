@@ -153,9 +153,7 @@ class MY_Model extends CI_Model
 	{
 		$name = config_item( $name );
 
-		return ! empty( $name )
-			? $this->db->dbprefix . $name
-			: '';
+		return $this->db->dbprefix( $name );
 	}
 	
 	// -----------------------------------------------------------------------
